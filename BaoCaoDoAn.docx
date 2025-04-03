@@ -1,0 +1,114 @@
+# ĐỒ ÁN PHÁT HIỆN TRUY CẬP BẤT THƯỜNG TRONG MẠNG WIFI
+
+## 1. Giới thiệu
+[Previous sections remain unchanged...]
+
+## 5. Quy trình Tối ưu hóa Mô hình
+
+### 5.1. Điều chỉnh Hyperparameters
+
+#### a) Grid Search
+- Thực hiện tìm kiếm lưới trên các tham số:
+  * n_estimators: [100, 200, 300] - Số lượng cây trong rừng
+  * max_depth: [10, 20, 30, None] - Độ sâu tối đa của mỗi cây
+  * min_samples_split: [2, 5, 10] - Số mẫu tối thiểu để phân tách nút
+  * min_samples_leaf: [1, 2, 4] - Số mẫu tối thiểu tại nút lá
+
+#### b) Cross-validation
+- Sử dụng 5-fold cross-validation
+- Đánh giá bằng F1-score
+- Chọn bộ tham số tốt nhất dựa trên điểm trung bình
+
+#### c) Ý nghĩa các tham số
+1. n_estimators:
+   - Càng nhiều cây càng ổn định
+   - Nhưng tốn thời gian huấn luyện
+   - Cần cân bằng giữa hiệu suất và tốc độ
+
+2. max_depth:
+   - Kiểm soát độ phức tạp của mô hình
+   - None cho phép cây phát triển tối đa
+   - Giá trị nhỏ giúp tránh overfitting
+
+3. min_samples_split và min_samples_leaf:
+   - Kiểm soát kích thước nút
+   - Giúp tránh overfitting
+   - Ảnh hưởng đến khả năng tổng quát hóa
+
+### 5.2. Lựa chọn Đặc trưng
+
+#### a) Feature Importance
+- Sử dụng Random Forest để đánh giá tầm quan trọng của đặc trưng
+- Loại bỏ các đặc trưng ít quan trọng
+- Giảm chiều dữ liệu và tránh overfitting
+
+#### b) SelectFromModel
+- Tự động chọn ngưỡng tầm quan trọng
+- Chỉ giữ lại các đặc trưng quan trọng nhất
+- Cải thiện tốc độ huấn luyện và dự đoán
+
+#### c) Lợi ích
+1. Giảm độ phức tạp:
+   - Ít đặc trưng hơn
+   - Mô hình đơn giản hơn
+   - Giảm thời gian huấn luyện
+
+2. Tăng hiệu suất:
+   - Loại bỏ nhiễu
+   - Tập trung vào đặc trưng quan trọng
+   - Cải thiện độ chính xác
+
+### 5.3. Xử lý Mất cân bằng Dữ liệu
+
+#### a) SMOTE (Synthetic Minority Over-sampling Technique)
+- Tạo mẫu nhân tạo cho lớp thiểu số
+- Cân bằng phân bố dữ liệu
+- Cải thiện khả năng phát hiện truy cập bất thường
+
+#### b) Quy trình SMOTE
+1. Phân tích lân cận:
+   - Tìm k láng giềng gần nhất
+   - Chọn ngẫu nhiên một láng giềng
+   - Tạo mẫu mới bằng nội suy
+
+2. Tạo mẫu cân bằng:
+   - Tăng số lượng mẫu thiểu số
+   - Giữ nguyên mẫu đa số
+   - Cân bằng tỷ lệ các lớp
+
+#### c) Lợi ích
+1. Cải thiện học tập:
+   - Mô hình học tốt hơn từ lớp thiểu số
+   - Giảm thiên lệch về lớp đa số
+   - Tăng độ nhạy (Recall)
+
+2. Kết quả tốt hơn:
+   - Phát hiện tốt hơn các truy cập bất thường
+   - Giảm false negatives
+   - Tăng F1-score
+
+### 5.4. Kết quả Tối ưu hóa
+
+#### a) So sánh trước và sau tối ưu
+- Accuracy tăng
+- F1-score cải thiện
+- ROC-AUC cao hơn
+- Precision-Recall cân bằng hơn
+
+#### b) Phân tích hiệu quả
+1. Hyperparameter tuning:
+   - Tìm được cấu hình tối ưu
+   - Cải thiện khả năng tổng quát hóa
+   - Giảm overfitting
+
+2. Feature selection:
+   - Giảm độ phức tạp
+   - Tăng tốc độ dự đoán
+   - Duy trì hiệu suất cao
+
+3. SMOTE:
+   - Cân bằng dữ liệu
+   - Tăng khả năng phát hiện bất thường
+   - Giảm false negatives
+
+[Previous sections about evaluation metrics and conclusion remain unchanged...]

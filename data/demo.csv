@@ -1,0 +1,8 @@
+SSID,MAC,Encryption,Signal_Strength,duration,src_bytes,dst_bytes
+Home_Network,AA:BB:CC:DD:EE:11,WPA2,-50,0,100,200
+Home_Network,AA:BB:CC:DD:EE:11,WPA2,-48,2,110,210
+Home_Network,AA:BB:CC:DD:EE:11,WPA2,-52,1,120,190
+Home_Network,AA:BB:CC:DD:EE:11,WPA2,-49,0,130,220
+Home_Network,AA:BB:CC:DD:EE:11,WPA2,-47,3,140,230
+Home_Network,AA:BB:CC:DD:EE:11,WPA2,-51,1,150,240
+
