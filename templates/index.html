@@ -3,55 +3,54 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WiFi Access Point Analysis</title>
+    <title>Phân tích An ninh Mạng</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        .upload-area {
-            border: 2px dashed #ccc;
+        .upload-box {
+            border: 2px dashed #6c757d;
             border-radius: 10px;
-            padding: 50px;
+            padding: 2rem;
             text-align: center;
-            background-color: #f8f9fa;
+            background: #f8f9fa;
             cursor: pointer;
+            transition: all 0.3s;
         }
-        .upload-area:hover {
-            background-color: #e9ecef;
-            border-color: #6c757d;
+        .upload-box:hover {
+            background: #e9ecef;
+            border-color: #0d6efd;
         }
         .upload-icon {
-            font-size: 48px;
+            font-size: 3rem;
             color: #6c757d;
-            margin-bottom: 15px;
         }
     </style>
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <nav class="navbar navbar-dark bg-dark">
         <div class="container">
-            <a class="navbar-brand" href="/"><i class="fas fa-wifi me-2"></i>WiFi Analysis</a>
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-shield-alt"></i> Network Security Analyzer
+            </a>
         </div>
     </nav>
 
-    <div class="container mt-5">
+    <div class="container my-5">
         <div class="row justify-content-center">
             <div class="col-md-8">
-                <div class="card">
-                    <div class="card-header">
-                        <h4 class="mb-0">Tải lên File Dump WiFi</h4>
+                <div class="card shadow">
+                    <div class="card-header bg-primary text-white">
+                        <h4 class="mb-0">Tải lên file dữ liệu mạng</h4>
                     </div>
                     <div class="card-body">
-                        <form id="upload-form">
-                            <div class="upload-area" id="drop-zone">
-                                <i class="fas fa-cloud-upload-alt upload-icon"></i>
-                                <h5>Kéo và thả file hoặc click để chọn file</h5>
-                                <p class="text-muted">Hỗ trợ file .csv và .dump</p>
-                                <input type="file" id="file-input" class="d-none" accept=".csv,.dump">
-                            </div>
-                            <div class="progress mt-3 d-none" id="upload-progress">
-                                <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar"></div>
-                            </div>
-                        </form>
+                        <div id="upload-container" class="upload-box">
+                            <i class="fas fa-cloud-upload-alt upload-icon"></i>
+                            <h5 class="mt-3">Kéo thả file hoặc click để chọn</h5>
+                            <p class="text-muted mb-0">Hỗ trợ định dạng .csv và .txt</p>
+                            <input type="file" id="file-input" class="d-none" accept=".csv,.txt">
+                        </div>
+                        <div id="progress" class="progress mt-3 d-none">
+                            <div class="progress-bar progress-bar-striped" role="progressbar"></div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -60,65 +59,40 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        document.getElementById('drop-zone').addEventListener('click', function() {
-            document.getElementById('file-input').click();
-        });
+        const uploadBox = document.getElementById('upload-container');
+        const fileInput = document.getElementById('file-input');
+        const progressBar = document.querySelector('.progress-bar');
 
-        document.getElementById('file-input').addEventListener('change', function(e) {
-            uploadFile(e.target.files[0]);
-        });
+        uploadBox.addEventListener('click', () => fileInput.click());
+        
+        fileInput.addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
 
-        document.getElementById('drop-zone').addEventListener('dragover', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            this.style.backgroundColor = '#e9ecef';
-        });
-
-        document.getElementById('drop-zone').addEventListener('dragleave', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            this.style.backgroundColor = '#f8f9fa';
-        });
-
-        document.getElementById('drop-zone').addEventListener('drop', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            this.style.backgroundColor = '#f8f9fa';
-            
-            const file = e.dataTransfer.files[0];
-            uploadFile(file);
-        });
-
-        function uploadFile(file) {
             const formData = new FormData();
             formData.append('file', file);
 
-            const progress = document.getElementById('upload-progress');
-            progress.classList.remove('d-none');
-            const progressBar = progress.querySelector('.progress-bar');
-            progressBar.style.width = '0%';
-
-            fetch('/upload', {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    progressBar.style.width = '100%';
-                    setTimeout(() => {
-                        window.location.href = `/analyze/${data.filename}`;
-                    }, 500);
+            try {
+                uploadBox.style.opacity = '0.5';
+                document.getElementById('progress').classList.remove('d-none');
+                
+                const response = await fetch('/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                if (result.success) {
+                    window.location.href = result.redirect;
                 } else {
-                    alert(data.error);
-                    progress.classList.add('d-none');
+                    alert(result.error || 'Upload thất bại');
                 }
-            })
-            .catch(error => {
-                alert('Upload failed');
-                progress.classList.add('d-none');
-            });
-        }
+            } catch (error) {
+                alert('Lỗi kết nối');
+            } finally {
+                uploadBox.style.opacity = '1';
+            }
+        });
     </script>
 </body>
 </html>
