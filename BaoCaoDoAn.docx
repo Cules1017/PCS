@@ -127,3 +127,57 @@ TÀI LIỆU THAM KHẢO
 2. Random Forest Classifier documentation
 3. Flask documentation
 4. CUDA/cuML documentation
+
+
+==== Bổ Sung ===
+🔥 1. Flag bất thường
+Các cờ TCP như S0, REJ, RSTO, RSTR, S1,… thường liên quan đến tấn công.
+
+S0: TCP bắt đầu nhưng không hoàn thành → có thể là DoS hoặc Port Scan
+
+REJ: bị từ chối kết nối → có thể là scanning hoặc probe attack
+
+🧨 2. src_bytes rất thấp, dst_bytes = 0
+Cho thấy kết nối không thành công hoặc không trao đổi dữ liệu thật → khả năng là scan hoặc DoS
+
+🚫 3. wrong_fragment > 0 hoặc urgent > 0
+Gói tin bị phân mảnh sai hoặc sử dụng cờ khẩn cấp: dấu hiệu tấn công exploit hoặc DoS
+
+🧠 4. num_failed_logins cao, root_shell, su_attempted > 0
+Có nhiều lần login thất bại hoặc truy cập vào shell root → tấn công chiếm quyền (U2R hoặc R2L)
+
+📈 5. count, srv_count, same_srv_rate cao bất thường
+Cho thấy host đó đang gửi nhiều request đến cùng một host/dịch vụ → dấu hiệu của DoS hoặc Scan
+
+🕵️ 6. rerror_rate, srv_rerror_rate, serror_rate cao
+Tỷ lệ lỗi phản hồi cao → kết nối không thành công → khả năng tấn công hoặc dò quét cổng
+
+🧷 7. dst_host_srv_diff_host_rate, dst_host_same_src_port_rate cao
+Kết nối đến nhiều host khác nhau từ cùng port hoặc ngược lại → dấu hiệu quét mạng hoặc spoofing
+
+📌 Ví dụ minh hoạ cụ thể:
+csv
+Sao chép
+Chỉnh sửa
+duration,protocol_type,service,flag,...,num_failed_logins,root_shell,...,serror_rate,rerror_rate,label
+2,tcp,private,REJ,...,0,0,...,1.00,0.00,anomaly
+→ REJ, serror_rate = 1.00 → dấu hiệu quét port bị từ chối
+
+✅ Tóm lại: Một bản ghi có nguy cơ bị tấn công nếu có một hay nhiều đặc điểm sau:
+Dấu hiệu	Có thể là kiểu tấn công
+flag = S0, REJ, RSTO	DoS, Probe
+src_bytes = 0, dst_bytes = 0	Scan, DoS
+wrong_fragment > 0	Exploit, DoS
+num_failed_logins > 0	Brute force, R2L
+root_shell = 1, su_attempted > 0	U2R
+serror_rate > 0.5	DoS
+count/srv_count rất cao	DoS, Scan
+Bạn muốn mình highlight cụ thể dòng nào trong file bạn gửi là nghi ngờ bị tấn công không? Hoặc mình có thể phân tích từng dòng giúp bạn.
+
+
+
+
+
+
+
+
