@@ -1,0 +1,40 @@
+Hướng dẫn sử dụng file mẫu wifi_traffic_sample.csv:
+
+1. Cấu trúc dữ liệu:
+- File CSV chứa 41 cột theo định dạng chuẩn
+- Mỗi dòng là một kết nối mạng
+
+2. Các loại kết nối mẫu:
+a) Kết nối bình thường:
+- HTTP (dòng 1): Truy cập web thông thường
+- DNS (dòng 2,9): Phân giải tên miền
+- HTTPS (dòng 3): Kết nối web bảo mật
+- SMTP (dòng 7): Gửi email
+- FTP (dòng 8): Truyền file
+
+b) Kết nối đáng ngờ:
+- DHCP (dòng 4): Yêu cầu IP bất thường (flag S0)
+- Telnet (dòng 5): Đăng nhập thất bại nhiều lần
+- SSH (dòng 6): Bị từ chối kết nối (flag REJ)
+- HTTP (dòng 10): Có dấu hiệu tấn công (land=1, hot=1, root_shell=1)
+
+3. Các trường dữ liệu quan trọng:
+- duration: Thời lượng kết nối (giây)
+- src_bytes: Bytes gửi đi
+- dst_bytes: Bytes nhận về
+- flag: Trạng thái kết nối (SF, S0, REJ, RSTO, S1)
+- serror_rate: Tỷ lệ lỗi
+- srv_count: Số kết nối cùng dịch vụ
+- dst_host_count: Số kết nối tới cùng máy chủ
+
+4. Cách sử dụng:
+- Upload file lên hệ thống qua giao diện web
+- Hệ thống sẽ phân tích và hiển thị:
+  * Biểu đồ phân bố lưu lượng
+  * Bảng chi tiết từng kết nối
+  * Cảnh báo các kết nối bất thường
+
+5. Lưu ý:
+- Dữ liệu đã được chuẩn hóa và làm sạch
+- Các giá trị số đều nằm trong khoảng hợp lệ
+- Đã bao gồm các trường hợp cả bình thường và bất thường

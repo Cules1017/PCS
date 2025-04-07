@@ -1,114 +1,129 @@
-# ĐỒ ÁN PHÁT HIỆN TRUY CẬP BẤT THƯỜNG TRONG MẠNG WIFI
+BÁO CÁO ĐỒ ÁN
+PHÁT HIỆN TRUY CẬP BẤT THƯỜNG TRONG MẠNG WIFI SỬ DỤNG MACHINE LEARNING
 
-## 1. Giới thiệu
-[Previous sections remain unchanged...]
+1. GIỚI THIỆU
+Đồ án này tập trung vào việc xây dựng một hệ thống phát hiện truy cập bất thường trong mạng sử dụng học máy, cụ thể là mô hình Random Forest. Hệ thống được triển khai dưới dạng web application cho phép người dùng tải lên dữ liệu mạng và nhận kết quả phân tích trong thời gian thực.
 
-## 5. Quy trình Tối ưu hóa Mô hình
+2. KIẾN TRÚC HỆ THỐNG
 
-### 5.1. Điều chỉnh Hyperparameters
+2.1. Thành phần chính:
+- Module phân tích và huấn luyện (network_analysis.ipynb)
+- Web application (app.py)
+- Model được huấn luyện (stored in /models)
+- Giao diện người dùng (templates/*.html)
 
-#### a) Grid Search
-- Thực hiện tìm kiếm lưới trên các tham số:
-  * n_estimators: [100, 200, 300] - Số lượng cây trong rừng
-  * max_depth: [10, 20, 30, None] - Độ sâu tối đa của mỗi cây
-  * min_samples_split: [2, 5, 10] - Số mẫu tối thiểu để phân tách nút
-  * min_samples_leaf: [1, 2, 4] - Số mẫu tối thiểu tại nút lá
+2.2. Công nghệ sử dụng:
+- Python
+- Scikit-learn (Random Forest Classifier)
+- Flask (Web Framework)
+- Pandas & NumPy (Xử lý dữ liệu)
+- CUDA/cuML (GPU Acceleration - optional)
 
-#### b) Cross-validation
-- Sử dụng 5-fold cross-validation
-- Đánh giá bằng F1-score
-- Chọn bộ tham số tốt nhất dựa trên điểm trung bình
+3. PHƯƠNG PHÁP
 
-#### c) Ý nghĩa các tham số
-1. n_estimators:
-   - Càng nhiều cây càng ổn định
-   - Nhưng tốn thời gian huấn luyện
-   - Cần cân bằng giữa hiệu suất và tốc độ
+3.1. Dữ liệu
+- Dataset: Dữ liệu dump traffic mạng WiFi
+- Features: 41 đặc trưng bao gồm:
+  * Categorical: protocol_type (loại giao thức: tcp/udp/icmp), service (dịch vụ), flag (cờ kết nối)
+  * Numerical: 38 đặc trưng số học bao gồm:
+    - Thông tin cơ bản: duration (thời lượng), src_bytes (bytes gửi), dst_bytes (bytes nhận)
+    - Đặc trưng nội dung: hot, num_failed_logins, logged_in, num_compromised
+    - Đặc trưng lưu lượng: count, srv_count, serror_rate, srv_serror_rate
+    - Đặc trưng máy chủ: dst_host_count, dst_host_srv_count, dst_host_same_srv_rate
 
-2. max_depth:
-   - Kiểm soát độ phức tạp của mô hình
-   - None cho phép cây phát triển tối đa
-   - Giá trị nhỏ giúp tránh overfitting
+3.2. Tiền xử lý dữ liệu:
+- Chuẩn hóa dữ liệu số học (StandardScaler)
+- Mã hóa one-hot cho categorical features
+- Xử lý missing values
+- Feature selection
 
-3. min_samples_split và min_samples_leaf:
-   - Kiểm soát kích thước nút
-   - Giúp tránh overfitting
-   - Ảnh hưởng đến khả năng tổng quát hóa
+3.3. Mô hình:
+- Random Forest Classifier
+- Hyperparameters:
+  * n_estimators: 200
+  * max_depth: 20
+  * min_samples_split: 5
+  * min_samples_leaf: 2
 
-### 5.2. Lựa chọn Đặc trưng
+4. TRIỂN KHAI
 
-#### a) Feature Importance
-- Sử dụng Random Forest để đánh giá tầm quan trọng của đặc trưng
-- Loại bỏ các đặc trưng ít quan trọng
-- Giảm chiều dữ liệu và tránh overfitting
+4.1. Training Pipeline:
+- Tải và xử lý dataset
+- Phân tích dữ liệu (EDA)
+- GPU acceleration (if available)
+- Cross-validation
+- Model optimization
 
-#### b) SelectFromModel
-- Tự động chọn ngưỡng tầm quan trọng
-- Chỉ giữ lại các đặc trưng quan trọng nhất
-- Cải thiện tốc độ huấn luyện và dự đoán
+4.2. Web Application:
+- RESTful API endpoints
+- File upload handling
+- Real-time prediction
+- Kết quả trực quan
 
-#### c) Lợi ích
-1. Giảm độ phức tạp:
-   - Ít đặc trưng hơn
-   - Mô hình đơn giản hơn
-   - Giảm thời gian huấn luyện
+4.3. Bảo mật:
+- File validation
+- Path traversal protection
+- Size limit (16MB)
+- Allowed file types (.csv, .txt)
 
-2. Tăng hiệu suất:
-   - Loại bỏ nhiễu
-   - Tập trung vào đặc trưng quan trọng
-   - Cải thiện độ chính xác
+5. KẾT QUẢ VÀ ĐÁNH GIÁ
 
-### 5.3. Xử lý Mất cân bằng Dữ liệu
+5.1. Metrics:
+- ROC-AUC score
+- Precision-Recall curve
+- F1 score
+- Cross-validation scores
 
-#### a) SMOTE (Synthetic Minority Over-sampling Technique)
-- Tạo mẫu nhân tạo cho lớp thiểu số
-- Cân bằng phân bố dữ liệu
-- Cải thiện khả năng phát hiện truy cập bất thường
+5.2. Visualization:
+- Confusion Matrix
+- ROC Curve
+- Learning Curves
+- Feature Importance
 
-#### b) Quy trình SMOTE
-1. Phân tích lân cận:
-   - Tìm k láng giềng gần nhất
-   - Chọn ngẫu nhiên một láng giềng
-   - Tạo mẫu mới bằng nội suy
+6. HƯỚNG DẪN SỬ DỤNG
 
-2. Tạo mẫu cân bằng:
-   - Tăng số lượng mẫu thiểu số
-   - Giữ nguyên mẫu đa số
-   - Cân bằng tỷ lệ các lớp
+6.1. Yêu cầu hệ thống:
+- Python 3.x
+- Required packages (requirements.txt)
+- CUDA toolkit (optional)
 
-#### c) Lợi ích
-1. Cải thiện học tập:
-   - Mô hình học tốt hơn từ lớp thiểu số
-   - Giảm thiên lệch về lớp đa số
-   - Tăng độ nhạy (Recall)
+6.2. Cài đặt:
+- Clone repository
+- Install dependencies
+- Run Flask application
 
-2. Kết quả tốt hơn:
-   - Phát hiện tốt hơn các truy cập bất thường
-   - Giảm false negatives
-   - Tăng F1-score
+6.3. Định dạng dữ liệu đầu vào:
+- File .csv chứa dữ liệu traffic mạng
+- Mỗi dòng là một kết nối với 41 đặc trưng
+- Cột label: 0 (bình thường) hoặc 1 (bất thường)
 
-### 5.4. Kết quả Tối ưu hóa
+6.4. Sử dụng:
+1. Truy cập web interface
+2. Upload file dữ liệu (.csv)
+3. Xem kết quả phân tích
 
-#### a) So sánh trước và sau tối ưu
-- Accuracy tăng
-- F1-score cải thiện
-- ROC-AUC cao hơn
-- Precision-Recall cân bằng hơn
+7. KẾT LUẬN VÀ HƯỚNG PHÁT TRIỂN
 
-#### b) Phân tích hiệu quả
-1. Hyperparameter tuning:
-   - Tìm được cấu hình tối ưu
-   - Cải thiện khả năng tổng quát hóa
-   - Giảm overfitting
+7.1. Ưu điểm:
+- GPU acceleration support
+- Real-time analysis
+- Scalable architecture
+- User-friendly interface
 
-2. Feature selection:
-   - Giảm độ phức tạp
-   - Tăng tốc độ dự đoán
-   - Duy trì hiệu suất cao
+7.2. Hạn chế:
+- Limited file size
+- Fixed feature set
+- Batch processing only
 
-3. SMOTE:
-   - Cân bằng dữ liệu
-   - Tăng khả năng phát hiện bất thường
-   - Giảm false negatives
+7.3. Hướng phát triển:
+- Stream processing
+- Distributed computing
+- Model retraining
+- Additional algorithms
 
-[Previous sections about evaluation metrics and conclusion remain unchanged...]
+TÀI LIỆU THAM KHẢO
+
+1. NSL-KDD dataset documentation
+2. Random Forest Classifier documentation
+3. Flask documentation
+4. CUDA/cuML documentation

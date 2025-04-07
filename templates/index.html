@@ -5,11 +5,35 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Phân tích An ninh Mạng</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
     <style>
+        /* General Styles */
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        main {
+            flex: 1 0 auto;
+        }
+        
+        /* Card hover effects */
+        .card {
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.15);
+        }
+        
+        /* Upload box styles */
         .upload-box {
             border: 2px dashed #6c757d;
             border-radius: 10px;
-            padding: 2rem;
+            padding: 2.5rem;
             text-align: center;
             background: #f8f9fa;
             cursor: pointer;
@@ -18,81 +42,460 @@
         .upload-box:hover {
             background: #e9ecef;
             border-color: #0d6efd;
+            transform: scale(1.01);
         }
         .upload-icon {
-            font-size: 3rem;
-            color: #6c757d;
+            font-size: 3.5rem;
+            color: #0d6efd;
+            margin-bottom: 1rem;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        
+        /* Progress bar animation */
+        .progress-bar-animated {
+            animation: progress-bar-stripes 1s linear infinite;
+        }
+
+        /* File type badges */
+        .file-type-badge {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            background: rgba(13, 110, 253, 0.1);
+            border-radius: 20px;
+            margin: 0.25rem;
+            font-size: 0.9rem;
+            color: #0d6efd;
+        }
+
+        /* Footer positioning */
+        .footer {
+            margin-top: auto;
+            background-color: #343a40;
+            color: white;
+            padding: 1.5rem 0;
+        }
+        
+        /* Navbar styles */
+        .navbar {
+            transition: all 0.3s ease;
+            padding: 1rem 0;
+        }
+        .navbar.scrolled {
+            background: rgba(33, 37, 41, 0.95) !important;
+            padding: 0.5rem 0;
+        }
+        .nav-link {
+            position: relative;
+            padding: 0.5rem 1rem !important;
+        }
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 0;
+            height: 2px;
+            background: #0d6efd;
+            transition: all 0.3s ease;
+            transform: translateX(-50%);
+        }
+        .nav-link:hover::after,
+        .nav-link.active::after {
+            width: 80%;
+        }
+        
+        /* Section styles */
+        section {
+            padding: 4rem 0;
+            position: relative;
+        }
+        .section-title {
+            position: relative;
+            padding-bottom: 1rem;
+            margin-bottom: 3rem;
+            text-align: center;
+        }
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 3px;
+            background: #0d6efd;
+        }
+        
+        /* Feature cards */
+        .feature-card {
+            height: 100%;
+            border: none;
+            border-radius: 15px;
+        }
+        .feature-card .card-body {
+            padding: 2rem;
+        }
+        
+        /* Team member cards */
+        .team-member {
+            text-align: center;
+            padding: 1.5rem;
+        }
+        .team-member h5 {
+            color: #2c3e50;
+            margin-top: 1rem;
         }
     </style>
 </head>
-<body>
-    <nav class="navbar navbar-dark bg-dark">
-        <div class="container">
-            <a class="navbar-brand" href="/">
-                <i class="fas fa-shield-alt"></i> Network Security Analyzer
-            </a>
-        </div>
-    </nav>
+<body class="bg-light d-flex flex-column min-vh-100">
+    <!-- Header -->
+    <header class="fixed-top">
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow">
+            <div class="container">
+                <a class="navbar-brand" href="/">
+                    <i class="fas fa-shield-alt"></i> Network Security Analyzer
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav ms-auto">
+                        <li class="nav-item">
+                            <a class="nav-link" href="#about">Giới thiệu</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#features">Tính năng</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#team">Nhóm</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
 
-    <div class="container my-5">
-        <div class="row justify-content-center">
-            <div class="col-md-8">
+    <!-- Main Content -->
+    <main class="flex-shrink-0 pt-5 mt-5">
+        <div class="container" style="margin-top: 80px;">
+            <!-- Project Introduction -->
+            <section id="about" data-aos="fade-up">
+                <div class="row mb-5">
+                    <div class="col-12">
+                <h2 class="text-center mb-4">Phân tích An ninh Mạng với Machine Learning</h2>
+                <p class="text-center lead">
+                    Hệ thống phát hiện tấn công mạng dựa trên phân tích lưu lượng WiFi với Random Forest
+                </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Team Members -->
+        <section id="team" data-aos="fade-up">
+        <div class="row mb-5">
+            <div class="col-12">
                 <div class="card shadow">
                     <div class="card-header bg-primary text-white">
-                        <h4 class="mb-0">Tải lên file dữ liệu mạng</h4>
+                        <h4 class="mb-0">Thành viên nhóm</h4>
                     </div>
                     <div class="card-body">
-                        <div id="upload-container" class="upload-box">
-                            <i class="fas fa-cloud-upload-alt upload-icon"></i>
-                            <h5 class="mt-3">Kéo thả file hoặc click để chọn</h5>
-                            <p class="text-muted mb-0">Hỗ trợ định dạng .csv và .txt</p>
-                            <input type="file" id="file-input" class="d-none" accept=".csv,.txt">
-                        </div>
-                        <div id="progress" class="progress mt-3 d-none">
-                            <div class="progress-bar progress-bar-striped" role="progressbar"></div>
+                        <div class="row">
+                            <div class="col-md-4 text-center mb-3">
+                                <h5>Nguyễn Hiếu Nghĩa</h5>
+                                <p class="text-muted">Machine Learning Engineer</p>
+                            </div>
+                            <div class="col-md-4 text-center mb-3">
+                                <h5>Nguyễn Thiện Sua</h5>
+                                <p class="text-muted">Data Scientist</p>
+                            </div>
+                            <div class="col-md-4 text-center mb-3">
+                                <h5>Đỗ Tường Vi</h5>
+                                <p class="text-muted">Security Analyst</p>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
+        </section>
+
+        <!-- Model & Dataset Info -->
+        <section id="stats" data-aos="fade-up">
+            <div class="row mb-5">
+            <div class="col-md-6 mb-4">
+                <div class="card shadow h-100">
+                    <div class="card-header bg-success text-white">
+                        <h4 class="mb-0">Mô hình & Độ chính xác</h4>
+                    </div>
+                    <div class="card-body">
+                        <h5>Random Forest Classifier</h5>
+                        <ul class="list-unstyled">
+                            <li>✓ Accuracy: 98.7%</li>
+                            <li>✓ Precision: 97.5%</li>
+                            <li>✓ Recall: 96.8%</li>
+                            <li>✓ F1-Score: 97.1%</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 mb-4">
+                <div class="card shadow h-100">
+                    <div class="card-header bg-info text-white">
+                        <h4 class="mb-0">Dataset</h4>
+                    </div>
+                    <div class="card-body">
+                        <h5>WiFi Traffic Dataset</h5>
+                        <ul class="list-unstyled">
+                            <li>✓ 41 features phân tích lưu lượng</li>
+                            <li>✓ Gồm thông tin giao thức, dịch vụ</li>
+                            <li>✓ Đặc trưng về bytes, packets</li>
+                            <li>✓ Phân loại Normal/Attack</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
         </div>
-    </div>
+
+        <!-- Features Section -->
+        <section id="features" class="bg-light py-5 mt-5">
+            <div class="container">
+                <h3 class="text-center mb-4">Tính năng chính</h3>
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <div class="card shadow h-100">
+                            <div class="card-body">
+                                <h5>Phân tích real-time</h5>
+                                <p>Phân tích và đưa ra kết quả ngay lập tức cho dữ liệu được tải lên</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <div class="card shadow h-100">
+                            <div class="card-body">
+                                <h5>Trực quan hóa</h5>
+                                <p>Biểu đồ tương tác giúp hiểu rõ hơn về các mẫu tấn công</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <div class="card shadow h-100">
+                            <div class="card-body">
+                                <h5>Báo cáo chi tiết</h5>
+                                <p>Thông tin chi tiết về từng kết nối và xác suất tấn công</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Upload Section -->
+        <section id="upload" class="py-5">
+            <div class="container">
+                <div class="row justify-content-center">
+                    <div class="col-md-8">
+                        <div class="card shadow-lg border-0" data-aos="fade-up">
+                            <div class="card-header bg-gradient bg-primary text-white">
+                                <h4 class="mb-0">
+                                    <i class="fas fa-cloud-upload-alt me-2"></i>
+                                    Tải lên file phân tích
+                                </h4>
+                            </div>
+                            <div class="card-body">
+                                <div id="upload-container" class="upload-box">
+                                    <i class="fas fa-cloud-upload-alt upload-icon"></i>
+                                    <h5 class="mt-3 fw-bold">Kéo thả file hoặc click để chọn</h5>
+                                    <p class="text-primary mb-3">Hỗ trợ định dạng .csv và .txt</p>
+                                    
+                                    <div class="file-requirements mb-3">
+                                        <span class="file-type-badge">
+                                            <i class="fas fa-check-circle me-1"></i>Protocol Type
+                                        </span>
+                                        <span class="file-type-badge">
+                                            <i class="fas fa-check-circle me-1"></i>Service
+                                        </span>
+                                        <span class="file-type-badge">
+                                            <i class="fas fa-check-circle me-1"></i>Traffic Data
+                                        </span>
+                                    </div>
+                                    
+                                    <small class="text-muted d-block mt-2">
+                                        File cần có các trường thông tin về giao thức, bytes, và lưu lượng mạng
+                                    </small>
+                                    <input type="file" id="file-input" class="d-none" accept=".csv,.txt">
+                                </div>
+                                
+                                <div id="progress" class="progress mt-4 d-none">
+                                    <div class="progress-bar progress-bar-striped progress-bar-animated bg-primary"
+                                         role="progressbar" style="width: 0%">
+                                    </div>
+                                </div>
+                                
+                                <div id="upload-message" class="alert mt-3 d-none"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+    
+    <!-- Footer -->
+    <footer class="footer bg-dark text-white py-4 mt-auto">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-6 text-center text-md-start">
+                    <p class="mb-0">© 2025 Network Security Analyzer</p>
+                </div>
+                <div class="col-md-6 text-center text-md-end">
+                    <p class="mb-0">
+                        Developed by
+                        <a href="#team" class="text-white text-decoration-none">
+                            <strong>Nghĩa</strong>, <strong>Sua</strong> & <strong>Vi</strong>
+                        </a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </footer>
+    </section>
+
+    <!-- Initialize scroll behavior -->
+    <script>
+        window.addEventListener('scroll', () => {
+            const navbar = document.querySelector('.navbar');
+            if (window.scrollY > 50) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+            
+            // Update active nav link
+            const sections = document.querySelectorAll('section[id]');
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop - 100;
+                const sectionHeight = section.clientHeight;
+                if (window.scrollY >= sectionTop && window.scrollY < sectionTop + sectionHeight) {
+                    document.querySelector(`.nav-link[href="#${section.id}"]`)?.classList.add('active');
+                } else {
+                    document.querySelector(`.nav-link[href="#${section.id}"]`)?.classList.remove('active');
+                }
+            });
+        });
+    </script>
+
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
     <script>
+        // Initialize AOS
+        AOS.init({
+            duration: 800,
+            once: true
+        });
+
+        // Upload handling
         const uploadBox = document.getElementById('upload-container');
         const fileInput = document.getElementById('file-input');
         const progressBar = document.querySelector('.progress-bar');
+        const progressDiv = document.getElementById('progress');
+        const messageDiv = document.getElementById('upload-message');
+
+        // Handle drag and drop
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            uploadBox.addEventListener(eventName, preventDefaults, false);
+        });
+
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        uploadBox.addEventListener('dragenter', () => {
+            uploadBox.classList.add('border-primary');
+        });
+
+        uploadBox.addEventListener('dragleave', () => {
+            uploadBox.classList.remove('border-primary');
+        });
+
+        uploadBox.addEventListener('drop', (e) => {
+            uploadBox.classList.remove('border-primary');
+            const file = e.dataTransfer.files[0];
+            handleFile(file);
+        });
 
         uploadBox.addEventListener('click', () => fileInput.click());
-        
-        fileInput.addEventListener('change', async (e) => {
-            const file = e.target.files[0];
+        fileInput.addEventListener('change', (e) => handleFile(e.target.files[0]));
+
+        async function handleFile(file) {
             if (!file) return;
+
+            // Validate file type
+            if (!file.name.match(/\.(csv|txt)$/i)) {
+                showMessage('Chỉ hỗ trợ file .csv hoặc .txt', 'danger');
+                return;
+            }
+
+            // Validate file size (max 16MB)
+            if (file.size > 16 * 1024 * 1024) {
+                showMessage('File không được vượt quá 16MB', 'danger');
+                return;
+            }
 
             const formData = new FormData();
             formData.append('file', file);
 
             try {
-                uploadBox.style.opacity = '0.5';
-                document.getElementById('progress').classList.remove('d-none');
+                // Show upload progress
+                uploadBox.style.opacity = '0.7';
+                progressDiv.classList.remove('d-none');
+                messageDiv.classList.add('d-none');
                 
+                // Simulate progress
+                let progress = 0;
+                const interval = setInterval(() => {
+                    progress += 5;
+                    if (progress <= 90) {
+                        progressBar.style.width = progress + '%';
+                    }
+                }, 100);
+
                 const response = await fetch('/upload', {
                     method: 'POST',
                     body: formData
                 });
                 
+                clearInterval(interval);
                 const result = await response.json();
+
                 if (result.success) {
-                    window.location.href = result.redirect;
+                    progressBar.style.width = '100%';
+                    showMessage('Tải lên thành công! Đang chuyển hướng...', 'success');
+                    setTimeout(() => {
+                        window.location.href = result.redirect;
+                    }, 1000);
                 } else {
-                    alert(result.error || 'Upload thất bại');
+                    throw new Error(result.error || 'Tải lên thất bại');
                 }
             } catch (error) {
-                alert('Lỗi kết nối');
+                progressBar.classList.add('bg-danger');
+                showMessage(error.message || 'Lỗi kết nối', 'danger');
             } finally {
                 uploadBox.style.opacity = '1';
             }
-        });
+        }
+
+        function showMessage(text, type) {
+            messageDiv.className = `alert alert-${type} mt-3`;
+            messageDiv.textContent = text;
+            messageDiv.classList.remove('d-none');
+        }
     </script>
 </body>
 </html>

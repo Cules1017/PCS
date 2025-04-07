@@ -6,52 +6,175 @@
     <title>Kết quả Phân tích</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap5.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <style>
-        .attack-row { background-color: #ffebee; }
-        .normal-row { background-color: #e8f5e9; }
-        .risk-badge { min-width: 80px; }
+        /* Layout */
+        body {
+            padding-top: 56px;
+        }
+        /* Table styling */
+        .attack-row {
+            background-color: rgba(255, 205, 210, 0.3) !important;
+        }
+        .normal-row {
+            background-color: rgba(200, 230, 201, 0.3) !important;
+        }
+        .risk-badge {
+            min-width: 80px;
+            font-weight: 500;
+        }
+        
+        /* Card improvements */
+        .card {
+            border: none;
+            border-radius: 8px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.1) !important;
+        }
+        .card-header {
+            border-radius: 8px 8px 0 0 !important;
+            padding: 1rem 1.5rem;
+        }
+        
+        /* DataTable customization */
+        .dataTables_wrapper .dataTables_length,
+        .dataTables_wrapper .dataTables_filter {
+            margin-bottom: 1rem;
+        }
+        .dataTables_wrapper .dataTables_info,
+        .dataTables_wrapper .dataTables_paginate {
+            margin-top: 1rem;
+        }
+        
+        /* Plot container */
+        #analysis-plot {
+            border-radius: 0 0 8px 8px;
+        }
+        
+        /* Modal improvements */
+        /* Print styles */
+        @media print {
+            .navbar, .btn-group, .modal {
+                display: none !important;
+            }
+            body {
+                padding-top: 0;
+            }
+            .card {
+                border: 1px solid #dee2e6 !important;
+                box-shadow: none !important;
+            }
+            .alert {
+                border: 1px solid #dee2e6 !important;
+            }
+        }
+
+        /* Modal improvements */
+        .modal-content {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+        }
+        .modal-header {
+            border-radius: 12px 12px 0 0;
+            padding: 1.25rem 1.5rem;
+        }
     </style>
 </head>
 <body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-shield-alt"></i> Network Security Analyzer
+            </a>
+            <div class="d-flex align-items-center">
+                <span class="badge bg-light text-dark me-3">
+                    <i class="fas fa-chart-line me-1"></i>
+                    {{ record_count }} kết nối
+                </span>
+                <a href="/" class="btn btn-outline-light btn-sm">
+                    <i class="fas fa-arrow-left me-1"></i> Quay lại
+                </a>
+            </div>
+        </div>
+    </nav>
+
     <div class="container-fluid py-4">
-        <div class="row">
+        <!-- Summary Stats -->
+        <div class="row mb-4">
             <div class="col-12">
-                <div class="card shadow mb-4">
-                    <div class="card-header bg-primary text-white">
-                        <h5 class="mb-0">Biểu đồ Phân tích</h5>
-                    </div>
-                    <div class="card-body">
-                        <div id="analysis-plot" style="height: 400px;"></div>
+                <div class="alert alert-info">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="mb-1">Tổng quan</h6>
+                            <p class="mb-0">Đã phân tích {{ record_count }} kết nối mạng</p>
+                        </div>
+                        <div class="text-end">
+                            <div class="btn-group" role="group">
+                                <button type="button" class="btn btn-outline-primary btn-sm" onclick="window.print()">
+                                    <i class="fas fa-print me-1"></i>In báo cáo
+                                </button>
+                                <a href="/" class="btn btn-outline-secondary btn-sm">
+                                    <i class="fas fa-upload me-1"></i>Tải lên file mới
+                                </a>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
+        </div>
 
+        <!-- Analysis Plot Section -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card shadow">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">Biểu đồ Phân tích Lưu lượng</h5>
+                    </div>
+                    <div class="card-body p-0">
+                        <div id="analysis-plot" style="height: 600px; width: 100%;">
+                            <div class="d-flex justify-content-center align-items-center h-100">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Đang tải...</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Connection Details Section -->
+        <div class="row">
             <div class="col-12">
                 <div class="card shadow">
                     <div class="card-header bg-primary text-white">
                         <h5 class="mb-0">Chi tiết Kết nối</h5>
                     </div>
-                    <div class="card-body">
-                        <table id="results-table" class="table table-hover">
-                            <thead class="table-light">
-                                <tr>
-                                    <th>Giao thức</th>
-                                    <th>Dịch vụ</th>
-                                    <th>Bytes Gửi</th>
-                                    <th>Bytes Nhận</th>
-                                    <th>Trạng thái</th>
-                                    <th>Xác suất</th>
-                                    <th>Chi tiết</th>
-                                </tr>
-                            </thead>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table id="results-table" class="table table-hover mb-0">
+                                <thead class="bg-light">
+                                    <tr>
+                                        <th class="fw-semibold">Giao thức</th>
+                                        <th class="fw-semibold">Dịch vụ</th>
+                                        <th class="fw-semibold">Thời lượng</th>
+                                        <th class="fw-semibold">Bytes Gửi</th>
+                                        <th class="fw-semibold">Bytes Nhận</th>
+                                        <th class="fw-semibold text-center">Trạng thái</th>
+                                        <th class="fw-semibold text-center">Độ tin cậy</th>
+                                        <th class="fw-semibold text-center">Chi tiết</th>
+                                    </tr>
+                                </thead>
                             <tbody>
                                 {% for conn in connections %}
                                 <tr class="{% if conn.prediction == 1 %}attack-row{% else %}normal-row{% endif %}">
-                                    <td>{{ conn.protocol_type }}</td>
+                                    <td>{{ conn.protocol_type|upper }}</td>
                                     <td>{{ conn.service }}</td>
-                                    <td>{{ conn.src_bytes }}</td>
-                                    <td>{{ conn.dst_bytes }}</td>
+                                    <td>{{ conn.duration }}s</td>
+                                    <td>{{ "{:,}".format(conn.src_bytes) }}</td>
+                                    <td>{{ "{:,}".format(conn.dst_bytes) }}</td>
                                     <td>
                                         <span class="badge risk-badge {% if conn.prediction == 1 %}bg-danger{% else %}bg-success{% endif %}">
                                             {{ 'Tấn công' if conn.prediction == 1 else 'Bình thường' }}
@@ -75,39 +198,109 @@
         </div>
     </div>
 
-    {% for conn in connections %}
-    <div class="modal fade" id="detailModal{{ loop.index }}" tabindex="-1">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Chi tiết Kết nối #{{ loop.index }}</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <h6>Thông tin Cơ bản</h6>
-                            <p><strong>Giao thức:</strong> {{ conn.protocol_type }}</p>
-                            <p><strong>Dịch vụ:</strong> {{ conn.service }}</p>
-                            <p><strong>Thời lượng:</strong> {{ conn.duration }}s</p>
+    <div id="modalsContainer">
+        {% for conn in connections %}
+        <div class="modal fade" id="detailModal{{ loop.index }}" tabindex="-1">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header {% if conn.prediction == 1 %}bg-danger{% else %}bg-success{% endif %} text-white">
+                        <h5 class="modal-title">
+                            <i class="fas {% if conn.prediction == 1 %}fa-exclamation-triangle{% else %}fa-shield-alt{% endif %} me-2"></i>
+                            Chi tiết Kết nối #{{ loop.index }}
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row g-4">
+                            <div class="col-md-6">
+                                <div class="card h-100">
+                                    <div class="card-header bg-light">
+                                        <h6 class="mb-0"><i class="fas fa-info-circle me-2"></i>Thông tin Kết nối</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <ul class="list-group list-group-flush">
+                                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                <span>Giao thức:</span>
+                                                <span class="badge bg-primary">{{ conn.protocol_type|upper }}</span>
+                                            </li>
+                                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                <span>Dịch vụ:</span>
+                                                <span class="badge bg-secondary">{{ conn.service }}</span>
+                                            </li>
+                                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                <span>Thời lượng:</span>
+                                                <span>{{ conn.duration }}s</span>
+                                            </li>
+                                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                <span>Cờ TCP:</span>
+                                                <span class="badge bg-info">{{ conn.flag }}</span>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card h-100">
+                                    <div class="card-header bg-light">
+                                        <h6 class="mb-0"><i class="fas fa-chart-bar me-2"></i>Thống kê Lưu lượng</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <ul class="list-group list-group-flush">
+                                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                <span>Bytes Gửi:</span>
+                                                <span class="text-primary">{{ "{:,}".format(conn.src_bytes) }}</span>
+                                            </li>
+                                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                <span>Bytes Nhận:</span>
+                                                <span class="text-primary">{{ "{:,}".format(conn.dst_bytes) }}</span>
+                                            </li>
+                                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                <span>Tỷ lệ lỗi:</span>
+                                                <span>{{ "%.2f"|format(conn.serror_rate * 100) }}%</span>
+                                            </li>
+                                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                <span>Độ tin cậy:</span>
+                                                <span>{{ "%.2f"|format((1 - conn.probability) * 100) }}%</span>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <div class="col-md-6">
-                            <h6>Thống kê Mạng</h6>
-                            <p><strong>Lỗi:</strong> {{ conn.wrong_fragment }}</p>
-                            <p><strong>Đăng nhập:</strong> {{ 'Thành công' if conn.logged_in else 'Thất bại' }}</p>
-                            <p><strong>Root Shell:</strong> {{ conn.root_shell }}</p>
+                        
+                        <div class="mt-4">
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <h6 class="card-title d-flex align-items-center mb-3">
+                                        <i class="fas fa-shield-alt me-2"></i>
+                                        Đánh giá Bảo mật
+                                    </h6>
+                                    <div class="progress" style="height: 25px;">
+                                        <div class="progress-bar {% if conn.prediction == 1 %}bg-danger{% else %}bg-success{% endif %}"
+                                             role="progressbar"
+                                             style="width: {{ conn.probability * 100 }}%">
+                                            {{ "%.1f"|format(conn.probability * 100) }}%
+                                        </div>
+                                    </div>
+                                    <div class="mt-2 text-center">
+                                        <span class="badge {% if conn.prediction == 1 %}bg-danger{% else %}bg-success{% endif %}">
+                                            {{ 'Nguy cơ cao' if conn.prediction == 1 else 'An toàn' }}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    <hr>
-                    <div class="alert {% if conn.prediction == 1 %}alert-danger{% else %}alert-success{% endif %}">
-                        <h6>Phân tích Bảo mật</h6>
-                        <p class="mb-0">Xác suất tấn công: {{ "%.2f"|format(conn.probability * 100) }}%</p>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            <i class="fas fa-times me-1"></i>Đóng
+                        </button>
                     </div>
                 </div>
             </div>
         </div>
+        {% endfor %}
     </div>
-    {% endfor %}
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
@@ -116,33 +309,164 @@
         // Khởi tạo DataTable
         $(document).ready(function() {
             $('#results-table').DataTable({
-                order: [[4, 'desc']],
+                order: [[5, 'desc']], // Sắp xếp theo cột Trạng thái
+                pageLength: 10,
                 language: {
                     url: '//cdn.datatables.net/plug-ins/1.11.5/i18n/vi.json'
                 },
+                dom: '<"row"<"col-sm-6"l><"col-sm-6"f>>' +
+                     '<"row"<"col-sm-12"tr>>' +
+                     '<"row"<"col-sm-5"i><"col-sm-7"p>>',
                 columnDefs: [
-                    { orderable: false, targets: [6] },
-                    { className: "text-center", targets: [4, 5, 6] }
+                    { orderable: false, targets: [7] },
+                    { className: "text-center align-middle", targets: [5, 6, 7] },
+                    { className: "align-middle", targets: '_all' },
+                    {
+                        targets: [3, 4], // Format số cho cột bytes
+                        render: function(data, type, row) {
+                            if (type === 'display') {
+                                return data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+                            }
+                            return data;
+                        }
+                    }
                 ]
             });
         });
 
         // Tạo biểu đồ Plotly
-        const traces = [{
-            x: {{ connections|map(attribute='src_bytes')|list|tojson }},
-            y: {{ connections|map(attribute='dst_bytes')|list|tojson }},
-            mode: 'markers',
-            marker: {
-                color: {{ connections|map(attribute='prediction')|list|tojson }},
-                colorscale: [[0, 'green'], [1, 'red']]
-            },
-            type: 'scatter'
-        }];
+        document.addEventListener('DOMContentLoaded', function() {
+            const plotContainer = document.getElementById('analysis-plot');
+            
+            try {
+                let plotData = JSON.parse('{{ plot_data|tojson|safe }}');
+                console.log('Raw plot data:', plotData);
+                
+                // Kiểm tra và chuyển đổi dữ liệu
+                const requiredFields = ['src_bytes', 'dst_bytes', 'predictions', 'protocol_types', 'services'];
+                
+                // Validate từng trường
+                for (const field of requiredFields) {
+                    if (!plotData[field]) {
+                        throw new Error(`Thiếu trường dữ liệu: ${field}`);
+                    }
+                    if (!Array.isArray(plotData[field])) {
+                        throw new Error(`Trường ${field} không phải là mảng`);
+                    }
+                    console.log(`${field} length:`, plotData[field].length);
+                }
 
-        Plotly.newPlot('analysis-plot', traces, {
-            title: 'Phân bổ Lưu lượng Mạng',
-            xaxis: { title: 'Bytes Gửi' },
-            yaxis: { title: 'Bytes Nhận' }
+                // Kiểm tra độ dài các mảng
+                const lengths = requiredFields.map(field => ({
+                    field,
+                    length: plotData[field].length
+                }));
+                
+                const uniqueLengths = [...new Set(lengths.map(l => l.length))];
+                if (uniqueLengths.length > 1) {
+                    throw new Error('Độ dài các mảng không khớp: ' +
+                        lengths.map(l => `${l.field}=${l.length}`).join(', '));
+                }
+
+                // Tạo trace cho biểu đồ
+                const traces = [{
+                    x: [...plotData.src_bytes], // Tạo bản sao của mảng
+                    y: [...plotData.dst_bytes],
+                    mode: 'markers',
+                    type: 'scatter',
+                    marker: {
+                        color: [...plotData.predictions],
+                        colorscale: [[0, 'green'], [1, 'red']],
+                        size: 10,
+                        opacity: 0.7
+                    },
+                    text: plotData.protocol_types.map((p, i) =>
+                        `<b>Giao thức:</b> ${p.toUpperCase()}<br>` +
+                        `<b>Dịch vụ:</b> ${plotData.services[i]}<br>` +
+                        `<b>Bytes gửi:</b> ${plotData.src_bytes[i].toLocaleString()}<br>` +
+                        `<b>Bytes nhận:</b> ${plotData.dst_bytes[i].toLocaleString()}`
+                    ),
+                    hoverinfo: 'text'
+                }];
+
+                console.log('Preparing to plot with data:', {
+                    x_length: traces[0].x.length,
+                    y_length: traces[0].y.length,
+                    color_length: traces[0].marker.color.length
+                });
+
+                const layout = {
+                    title: {
+                        text: 'Phân bố Lưu lượng Mạng',
+                        font: { size: 20, color: '#2c3e50' }
+                    },
+                    xaxis: {
+                        title: {
+                            text: 'Bytes Gửi (log scale)',
+                            font: { size: 14, color: '#34495e' }
+                        },
+                        type: 'log',
+                        gridcolor: '#ecf0f1',
+                        zeroline: false
+                    },
+                    yaxis: {
+                        title: {
+                            text: 'Bytes Nhận (log scale)',
+                            font: { size: 14, color: '#34495e' }
+                        },
+                        type: 'log',
+                        gridcolor: '#ecf0f1',
+                        zeroline: false
+                    },
+                    showlegend: false,
+                    height: 600,
+                    margin: { t: 60, b: 60, l: 70, r: 40 },
+                    plot_bgcolor: '#ffffff',
+                    paper_bgcolor: '#ffffff',
+                    hovermode: 'closest',
+                    shapes: [{
+                        type: 'rect',
+                        xref: 'paper',
+                        yref: 'paper',
+                        x0: 0,
+                        y0: 0,
+                        x1: 1,
+                        y1: 1,
+                        line: {
+                            color: '#e5e5e5',
+                            width: 1
+                        }
+                    }]
+                };
+
+                // Xóa loading spinner
+                plotContainer.innerHTML = '';
+                
+                // Vẽ biểu đồ với config tùy chỉnh
+                Plotly.newPlot('analysis-plot', traces, layout, {
+                    responsive: true,
+                    displayModeBar: true,
+                    displaylogo: false,
+                    modeBarButtonsToRemove: ['lasso2d', 'select2d']
+                }).then(() => {
+                    console.log('Biểu đồ đã được tạo thành công');
+                }).catch(err => {
+                    throw new Error(`Lỗi khi vẽ biểu đồ: ${err.message}`);
+                });
+
+            } catch (error) {
+                console.error('Lỗi khi tạo biểu đồ:', error);
+                plotContainer.innerHTML = `
+                    <div class="alert alert-danger m-3">
+                        <h4 class="alert-heading">Không thể tạo biểu đồ</h4>
+                        <p>Có lỗi xảy ra khi xử lý dữ liệu. Vui lòng kiểm tra lại file đầu vào.</p>
+                        <hr>
+                        <p><strong>Chi tiết lỗi:</strong> ${error.message}</p>
+                        <p class="text-muted mb-0">
+                            <small>Thử tải lại trang hoặc sử dụng file khác nếu lỗi vẫn tiếp tục.</small>
+                        </p>
+                    </div>`;
+            }
         });
     </script>
 </body>
