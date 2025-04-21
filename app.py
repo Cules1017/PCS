@@ -10,7 +10,8 @@ from sklearn.preprocessing import OneHotEncoder
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = 'uploads'
-app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB
+app.config['MAX_CONTENT_LENGTH'] = None  # Disable upload size limit
+app.config['MAX_CONTENT_LENGTH'] = 555 * 1024 * 1024  # 16MB
 
 # Load model và scaler
 model = joblib.load('models/rf_model.pkl')
@@ -173,32 +174,55 @@ def preprocess_data(df):
 @app.route('/')
 def home():
     return render_template('index.html')
+def save_file_chunks(file, filepath):
+    """Save file in chunks to handle large files."""
+    try:
+        with open(filepath, 'wb') as f:
+            chunk_size = 8192  # 8KB chunks
+            while True:
+                chunk = file.read(chunk_size)
+                if not chunk:
+                    break
+                f.write(chunk)
+        return True
+    except Exception as e:
+        app.logger.error(f"Error saving file: {str(e)}")
+        return False
 
 @app.route('/upload', methods=['POST'])
 def upload_file():
-    if 'file' not in request.files:
-        return jsonify({'error': 'Không có file được chọn'}), 400
-    
-    file = request.files['file']
-    if file.filename == '':
-        return jsonify({'error': 'Chưa chọn file'}), 400
-    
-    if file and allowed_file(file.filename):
-        # Thêm timestamp vào tên file
-        filename = secure_filename(file.filename)
-        name, ext = os.path.splitext(filename)
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        new_filename = f"{name}_{timestamp}{ext}"
+    try:
+        if 'file' not in request.files:
+            return jsonify({'error': 'Không có file được chọn'}), 400
         
-        filepath = os.path.join(app.config['UPLOAD_FOLDER'], new_filename)
-        file.save(filepath)
+        file = request.files['file']
+        if file.filename == '':
+            return jsonify({'error': 'Chưa chọn file'}), 400
         
-        return jsonify({
-            'success': True,
-            'filename': new_filename,
-            'redirect': f'/results/{new_filename}'
-        }), 200
-    
+        if file and allowed_file(file.filename):
+            # Thêm timestamp vào tên file
+            filename = secure_filename(file.filename)
+            name, ext = os.path.splitext(filename)
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            new_filename = f"{name}_{timestamp}{ext}"
+            
+            filepath = os.path.join(app.config['UPLOAD_FOLDER'], new_filename)
+            
+            # Save file in chunks
+            if save_file_chunks(file, filepath):
+                return jsonify({
+                    'success': True,
+                    'filename': new_filename,
+                    'redirect': f'/results/{new_filename}'
+                }), 200
+            else:
+                return jsonify({'error': 'Lỗi khi lưu file'}), 500
+        
+        return jsonify({'error': 'Định dạng file không hợp lệ'}), 400
+        
+    except Exception as e:
+        app.logger.error(f"Upload error: {str(e)}")
+        return jsonify({'error': 'Lỗi xử lý upload'}), 500
     return jsonify({'error': 'Định dạng file không hợp lệ'}), 400
 
 @app.route('/results/<filename>')
@@ -289,6 +313,7 @@ def show_results(filename):
 
         # Render results
         app.logger.info(f"Rendering results for {row_count} records")
+        print("Plot data",df_clean.to_dict('records'))
         return render_template(
             'results.html',
             plot_data=plot_data,

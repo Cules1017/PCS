@@ -259,8 +259,8 @@
                                                 <span>{{ "%.2f"|format(conn.serror_rate * 100) }}%</span>
                                             </li>
                                             <li class="list-group-item d-flex justify-content-between align-items-center">
-                                                <span>Độ tin cậy:</span>
-                                                <span>{{ "%.2f"|format((1 - conn.probability) * 100) }}%</span>
+                                                <span>Số kết nối:</span>
+                                                <span>{{ conn.count }}</span>
                                             </li>
                                         </ul>
                                     </div>
